@@ -495,6 +495,7 @@ libbitcoin_util_a_SOURCES = \
   interfaces/handler.cpp \
   logging.cpp \
   random.cpp \
+  random_v2.cpp \
   rpc/request.cpp \
   support/cleanse.cpp \
   sync.cpp \
