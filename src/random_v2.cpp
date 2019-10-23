@@ -91,6 +91,7 @@ public:
 
     ~RNGState_v2() {
         memory_cleanse(m_state, sizeof(m_state));
+        memory_cleanse(&m_counter, sizeof(m_counter));
     }
 
     /*
