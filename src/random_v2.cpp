@@ -37,8 +37,7 @@ public:
         }
     };
 
-    RNGState_v2()
-    {
+    RNGState_v2() {
         // Try RDSEED first to seed the PRNG.
         // Since we are seeding a PRNG with this value we use RDSEED instead of
         // RDRAND. See https://software.intel.com/en-us/blogs/2012/11/17/the-difference-between-rdrand-and-rdseed.
@@ -90,16 +89,14 @@ public:
         m_strongly_seeded = true;
     }
 
-    ~RNGState_v2()
-    {
-
+    ~RNGState_v2() {
+        memory_cleanse(m_state, sizeof(m_state));
     }
 
     /*
      * Extract up to PRNG_STATE_LEN bytes of entropy from the RNG state.
      */
-    void MixExtract(unsigned char* out, const size_t num)
-    {
+    void MixExtract(unsigned char* out, const size_t num) {
         assert(num <= PRNG_STATE_LEN);
         unsigned char buf[PRNG_STATE_LEN*2];
         CSHA512 hasher;
