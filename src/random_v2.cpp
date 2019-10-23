@@ -104,28 +104,27 @@ public:
         unsigned char buf[PRNG_STATE_LEN*2];
         CSHA512 hasher;
         static_assert(sizeof(buf) == CSHA512::OUTPUT_SIZE, "Buffer needs to have hasher's output size");
-        {
-            LOCK(m_mutex);
+  
+        LOCK(m_mutex);
 
-            if(!m_strongly_seeded) {
-                throw NotSeededException();
-            }
+        if(!m_strongly_seeded) {
+            throw NotSeededException();
+        }
 
-            // Write the current state of the RNG into the hasher
-            hasher.Write(m_state, PRNG_STATE_LEN);
-            // Write a new counter number into the state
-            hasher.Write((const unsigned char*)&m_counter, sizeof(m_counter));
-            ++m_counter;
-            // Finalize the hasher
-            hasher.Finalize(buf);
-            // Store the last PRNG_STATE_LEN bytes of the hash output as new RNG state.
-            memcpy(m_state, buf + PRNG_STATE_LEN, PRNG_STATE_LEN);
-        }
-        // If desired, copy (up to) the first PRNG_STATE_LEN bytes of the hash output as output.
-        if (num) {
-            assert(out != nullptr);
-            memcpy(out, buf, num);
-        }
+        // Write the current state of the RNG into the hasher
+        hasher.Write(m_state, PRNG_STATE_LEN);
+        // Write a new counter number into the state
+        hasher.Write((const unsigned char*)&m_counter, sizeof(m_counter));
+        ++m_counter;
+        // Finalize the hasher
+        hasher.Finalize(buf);
+        // Store the last PRNG_STATE_LEN bytes of the hash output as new RNG state.
+        memcpy(m_state, buf + PRNG_STATE_LEN, PRNG_STATE_LEN);
+
+        // Copy (up to) the first PRNG_STATE_LEN bytes of the hash output as output.
+        assert(out != nullptr);
+        memcpy(out, buf, num);
+        
         // Best effort cleanup of internal state
         hasher.Reset();
         memory_cleanse(buf, sizeof(buf));
