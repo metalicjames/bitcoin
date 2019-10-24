@@ -11,15 +11,14 @@
 #include <cstdlib>
 #include <new>
 
-namespace rust_block_fetch {
+namespace rust_os_rng {
 
 extern "C" {
 
-bool init_fetch_dns_headers(const char *domain);
-bool stop_fetch_dns_headers();
+uint32_t get_secure_random_uint32();
 
 } // extern "C"
 
-} // namespace rust_block_fetch
+} // namespace rust_os_rng
 
 #endif // BITCOIN_RUSTY_SRC_RUST_BRIDGE_H
