@@ -37,6 +37,7 @@ LIBSECP256K1=secp256k1/libsecp256k1.la
 
 if ENABLE_RUSTY
 LIBBITCOIN_RUSTY = rusty/librusty.a
+LIBBITCOIN_RUSTY_GETRANDOM = rusty/src/getrandom.rlib
 endif
 if ENABLE_ZMQ
 LIBBITCOIN_ZMQ=libbitcoin_zmq.a
@@ -362,14 +363,21 @@ libbitcoin_wallet_tool_a_SOURCES = \
 LIBBITCOIN_RUSTY_SRCS= \
   rusty/src/lib.rs
 
+LIBBITCOIN_RUSTY_DEPS = \
+  rusty/src/getrandom/lib.rs
+
 # We force overflow checks on so that any integer overflows result in a panic
 # instead of, eg, attempting to alloc 4GB of memory (though we will catch such
 # an alloc and refuse it, generating a panic instead).
 # Also force panics to unwind (instead of calling abort()) as we want to catch
 # panics in the Rust threads and simply close the thread, instead of bringing
 # down the rest of Bitcoin Core.
-$(LIBBITCOIN_RUSTY): $(LIBBITCOIN_RUSTY_SRCS)
-	$(RUSTC) --crate-name rusty $^ --crate-type=staticlib --emit=link -g -O -C overflow-checks=on -C panic=unwind --out-dir $(@D)
+$(LIBBITCOIN_RUSTY): $(LIBBITCOIN_RUSTY_SRCS) $(LIBBITCOIN_RUSTY_GETRANDOM)
+	$(RUSTC) -L rusty/src --crate-name rusty $^ --crate-type=staticlib --emit=link -g -O -C overflow-checks=on -C panic=unwind --out-dir $(@D)
+	touch $@
+
+$(LIBBITCOIN_RUSTY_GETRANDOM): $(LIBBITCOIN_RUSTY_DEPS)
+  $(RUSTC) $^ --crate-type=rlib --emit=link -g -O -C overflow-checks=on -C panic=unwind --out-dir $(@D)
 	touch $@
 
 # crypto primitives library

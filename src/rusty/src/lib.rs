@@ -3,7 +3,6 @@ mod os_rng;
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::ptr;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::time::{Duration, Instant};
 
 // We keep track of all memory allocated by Rust code, refusing new allocations if it exceeds
 // 128MB.
