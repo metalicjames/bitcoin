@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 #include <support/allocators/secure.h>
 
@@ -50,6 +51,10 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/conf.h>
+
+#ifdef ENABLE_RUSTY
+#include <rusty/out/rusty.hpp>
+#endif
 
 [[noreturn]] static void RandFailure()
 {
@@ -606,9 +611,36 @@ static void ProcRand(unsigned char* out, int num, RNGLevel level)
     }
 }
 
-void GetRandBytes(unsigned char* buf, int num) noexcept { ProcRand(buf, num, RNGLevel::FAST); }
-void GetStrongRandBytes(unsigned char* buf, int num) noexcept { ProcRand(buf, num, RNGLevel::SLOW); }
-void RandAddSeedSleep() { ProcRand(nullptr, 0, RNGLevel::SLEEP); }
+void GetRandBytes(unsigned char* buf, int num) noexcept { 
+    #ifdef ENABLE_RUSTY
+    GetStrongRandBytes(buf, num);
+    #else
+    ProcRand(buf, num, RNGLevel::FAST); 
+    #endif
+}
+
+void GetStrongRandBytes(unsigned char* buf, int num) noexcept {
+    #ifdef ENABLE_RUSTY
+    int count_bytes = 0;
+    while(count_bytes < num) {
+        uint64_t randint = rust_getrandom::get_secure_random_u64();
+        const int n_bytes = std::min(num-count_bytes, static_cast<int>(sizeof(randint)));
+
+        memcpy(buf+count_bytes, &randint, n_bytes);
+        count_bytes += n_bytes;
+
+        memory_cleanse(&randint, sizeof(randint));
+    }
+    #else
+    ProcRand(buf, num, RNGLevel::SLOW); 
+    #endif
+}
+
+void RandAddSeedSleep() {
+    #ifndef ENABLE_RUSTY
+    ProcRand(nullptr, 0, RNGLevel::SLEEP); 
+    #endif
+}
 
 bool g_mock_deterministic_tests{false};
 
@@ -733,8 +765,10 @@ FastRandomContext& FastRandomContext::operator=(FastRandomContext&& from) noexce
 
 void RandomInit()
 {
+    #ifndef ENABLE_RUSTY
     // Invoke RNG code to trigger initialization (if not already performed)
     ProcRand(nullptr, 0, RNGLevel::FAST);
 
     ReportHardwareRand();
+    #endif
 }

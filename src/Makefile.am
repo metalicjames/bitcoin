@@ -560,7 +560,7 @@ bitcoin_tx_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-bitcoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+bitcoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(LIBBITCOIN_RUST_LIBS) $(DL_LIBS)
 #
 
 # bitcoin-wallet binary #
@@ -620,12 +620,12 @@ RUSTY_DIST += rusty/Cargo.toml
 RUSTY_DIST += rusty/src/lib.rs
 
 if ENABLE_RUSTY
-RUSTY_H_NAMESPACE = rust_hello_world_example
+RUSTY_H_NAMESPACE = rust_getrandom
 RUSTY_H = rusty/out/rusty.hpp
 LIBBITCOIN_RUST_LIBS += $(LIBBITCOIN_RUSTY)
 
 $(RUSTY_H): | $(LIBBITCOIN_RUSTY)
-$(libbitcoin_server_a_OBJECTS) : $(RUSTY_H)
+$(libbitcoin_util_a_OBJECTS) : $(RUSTY_H)
 
 # TODO: Teach Cargo how to accept a target filename and upstream
 # See https://github.com/rust-lang/rust/issues/43749
