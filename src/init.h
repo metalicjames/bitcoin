@@ -73,4 +73,8 @@ void SetupServerArgs();
 /** Returns licensing information (for -version) */
 std::string LicenseInfo();
 
+#if HAVE_SYSTEM
+static void BlockNotifyCallback(bool initialSync, const CBlockIndex *pBlockIndex);
+#endif
+
 #endif // BITCOIN_INIT_H
