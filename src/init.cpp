@@ -572,7 +572,7 @@ std::string LicenseInfo()
 }
 
 #if HAVE_SYSTEM
-static void BlockNotifyCallback(bool initialSync, const CBlockIndex *pBlockIndex)
+void BlockNotifyCallback(bool initialSync, const CBlockIndex *pBlockIndex)
 {
     if (initialSync || !pBlockIndex)
         return;
@@ -1707,8 +1707,8 @@ bool AppInitMain(InitInterfaces& interfaces)
     }
 
 #if HAVE_SYSTEM
-    if (gArgs.IsArgSet("-blocknotify"))
-        uiInterface.NotifyBlockTip_connect(BlockNotifyCallback);
+    /*if (gArgs.IsArgSet("-blocknotify"))
+        uiInterface.NotifyBlockTip_connect(BlockNotifyCallback);*/
 #endif
 
     std::vector<fs::path> vImportFiles;
